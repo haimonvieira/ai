@@ -1,0 +1,94 @@
+// ===========================================
+// Schema do Prisma - MonitorCNJ
+// ===========================================
+// Banco de dados PostgreSQL via Neon.tech (Free Tier)
+// Armazena apenas metadados, NUNCA conteúdo de petições (LGPD)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ===========================================
+// USUÁRIOS
+// ===========================================
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  passwordHash  String
+  name          String?
+  oabNumber     String?   // Número da OAB (opcional)
+  oabState      String?   // UF da OAB
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  lastLoginAt   DateTime?
+  
+  // Relações
+  auditLogs     AuditLog[]
+  rateLimits    RateLimit[]
+  
+  @@index([email])
+  @@map("users")
+}
+
+// ===========================================
+// LIMITES DE USO (RATE LIMIT)
+// ===========================================
+// Controle de uso por provedor para não estourar free tier
+model RateLimit {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider    String   // 'groq', 'gemini', 'siliconflow'
+  count       Int      @default(0)
+  windowStart DateTime @default(now())
+  windowEnd   DateTime
+  
+  @@unique([userId, provider, windowStart])
+  @@index([userId, provider])
+  @@map("rate_limits")
+}
+
+// ===========================================
+// LOGS DE AUDITORIA (LGPD)
+// ===========================================
+// Metadados mínimos, SEM conteúdo sensível
+model AuditLog {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint    String   // Endpoint chamado
+  method      String   // HTTP method
+  provider    String?  // Provedor IA usado (se aplicável)
+  success     Boolean
+  statusCode  Int?
+  tokensUsed  Int?     // Tokens estimados (para controle)
+  cached      Boolean  @default(false) // Se veio do cache
+  ipAddress   String?  // IP mascarado (últimos 4 dígitos)
+  userAgent   String?
+  createdAt   DateTime @default(now())
+  
+  @@index([userId, createdAt])
+  @@index([endpoint, createdAt])
+  @@map("audit_logs")
+}
+
+// ===========================================
+// PREFERÊNCIAS DO USUÁRIO
+// ===========================================
+model UserPreferences {
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  defaultProvider String   @default("groq")
+  templateStyle   String   @default("formal") // formal, direto, detalhado
+  maxTokens       Int      @default(2000)
+  includeCitations Boolean @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@map("user_preferences")
+}
