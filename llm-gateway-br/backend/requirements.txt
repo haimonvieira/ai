@@ -1,0 +1,48 @@
+# FastAPI e servidor
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+python-multipart==0.0.6
+
+# LangChain e LLMs
+langchain==0.1.0
+langchain-core==0.1.0
+langchain-community==0.0.10
+langchain-openai==0.0.2
+langchain-anthropic==0.0.5
+langchain-google-genai==0.0.1
+
+# Vetorização e RAG
+chromadb==0.4.22
+sentence-transformers==2.3.1
+faiss-cpu==1.7.4
+
+# Banco de dados
+sqlalchemy==2.0.25
+alembic==1.13.1
+aiosqlite==0.19.0
+
+# Cache e sessões
+redis==5.0.1
+
+# Utilitários
+pydantic==2.5.3
+pydantic-settings==2.1.0
+python-dotenv==1.0.0
+httpx==0.26.0
+aiofiles==23.2.1
+tenacity==8.2.3
+
+# WebSockets
+websockets==12.0
+
+# Segurança
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+
+# Processamento de documentos
+pypdf==3.17.4
+python-docx==1.1.0
+unstructured==0.11.8
+
+# Logging e monitoramento
+loguru==0.7.2
